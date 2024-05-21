@@ -6,31 +6,35 @@ app.use(express.json());
 const cars = [
   {
     id: 1,
-    carro: "Camaro",
-    fabricante: "Chevrolet",
+    modelo: "Civic",
+    fabricante: "Honda",
+    valor: 90000,
   },
   {
     id: 2,
-    carro: "Jetta",
-    fabricante: "Volkswagem",
+    modelo: "Corolla",
+    fabricante: "Toyota",
+    valor: 95000,
   },
   {
     id: 3,
-    carro: "Fastback",
-    fabricante: "Fiat",
+    modelo: "Focus",
+    fabricante: "Ford",
+    valor: 85000,
   },
   {
     id: 4,
-    carro: "306",
-    fabricante: "Pegeout",
+    modelo: "Cruze",
+    fabricante: "Chevrolet",
+    valor: 92000,
   },
   {
     id: 5,
-    carro: "Virtus",
-    fabricante: "Volkswagem",
+    modelo: "Jetta",
+    fabricante: "Volkswagen",
+    valor: 98000,
   },
 ];
-
 function getCarByID(id) {
   return cars.filter((car) => car.id == id);
 }
@@ -40,17 +44,17 @@ function getIndexCarByID(id) {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.get("/cars", (req, res) => {
-  res.status(200).send(cars);
+  res.send("Welcome to my API!");
 });
 
 app.post("/cars", (req, res) => {
   cars.push(req.body);
 
   res.status(201).send("O carro foi adicionado com sucesso!");
+});
+
+app.get("/cars", (req, res) => {
+  res.status(200).send(cars);
 });
 
 app.get("/cars/:id", (req, res) => {
@@ -63,12 +67,22 @@ app.get("/cars/:id", (req, res) => {
   }
 });
 
+app.put("/cars/:id", (req, res) => {
+  let index = getIndexCarByID(req.params.id);
+
+  cars[index].modelo = req.body.modelo;
+  cars[index].fabricante = req.body.fabricante;
+  cars[index].valor = req.body.valor;
+
+  res.json(cars);
+});
+
 app.delete("/cars/:id", (req, res) => {
   let index = getIndexCarByID(req.params.id);
 
   cars.splice(index, 1);
 
-  res.status(200).send("Carro deletado!")
+  res.status(200).send("Carro deletado!");
 });
 
 export default app;
