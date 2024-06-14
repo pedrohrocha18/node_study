@@ -1,88 +1,75 @@
 import express from "express";
+import conexao from "../infra/conexao.js";
+import cors from "cors";
+
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-const cars = [
-  {
-    id: 1,
-    modelo: "Civic",
-    fabricante: "Honda",
-    valor: 90000,
-  },
-  {
-    id: 2,
-    modelo: "Corolla",
-    fabricante: "Toyota",
-    valor: 95000,
-  },
-  {
-    id: 3,
-    modelo: "Focus",
-    fabricante: "Ford",
-    valor: 85000,
-  },
-  {
-    id: 4,
-    modelo: "Cruze",
-    fabricante: "Chevrolet",
-    valor: 92000,
-  },
-  {
-    id: 5,
-    modelo: "Jetta",
-    fabricante: "Volkswagen",
-    valor: 98000,
-  },
-];
-function getCarByID(id) {
-  return cars.filter((car) => car.id == id);
-}
-
-function getIndexCarByID(id) {
-  return cars.findIndex((car) => car.id == id);
-}
-
-app.get("/", (req, res) => {
-  res.send("Welcome to my API!");
-});
-
-app.post("/cars", (req, res) => {
-  cars.push(req.body);
-
-  res.status(201).send("O carro foi adicionado com sucesso!");
-});
-
 app.get("/cars", (req, res) => {
-  res.status(200).send(cars);
+  const query = "SELECT * FROM table_cars;";
+
+  conexao.query(query, (err, result) => {
+    if (err) {
+      res.status(404).json({ erro: "Dados não localizados!" });
+    } else {
+      res.status(200).send(result);
+    }
+  });
 });
 
 app.get("/cars/:id", (req, res) => {
-  let car = getCarByID(req.params.id);
+  const query = "SELECT * FROM table_cars WHERE id =?";
+  const id = req.params.id;
 
-  if (car) {
-    res.status(200).send(car);
-  } else {
-    res.status(204).send("Veículo não encontrado!");
-  }
+  conexao.query(query, id, (err, result) => {
+    if (err) {
+      res.status(404).json({ error: "Dados não localizados!" });
+    } else {
+      res.status(200).send(result);
+    }
+  });
 });
 
-app.put("/cars/:id", (req, res) => {
-  let index = getIndexCarByID(req.params.id);
+app.post("/cars", (req, res) => {
+  const car = req.body;
+  const query = "INSERT INTO table_cars SET ?";
 
-  cars[index].modelo = req.body.modelo;
-  cars[index].fabricante = req.body.fabricante;
-  cars[index].valor = req.body.valor;
-
-  res.json(cars);
+  conexao.query(query, car, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: "Não foi possível adicionar" });
+    } else {
+      res.status(201).json({ sucess: "Carro adicionado!" });
+    }
+  });
 });
 
 app.delete("/cars/:id", (req, res) => {
-  let index = getIndexCarByID(req.params.id);
+  const id = req.params.id;
+  const query = "DELETE FROM table_cars WHERE id=?";
 
-  cars.splice(index, 1);
+  conexao.query(query, id, (err, result) => {
+    if (err) {
+      res.send(404).json({ error: "Carro não localizado!" });
+    } else {
+      res.status(200).send("Carro deletado com sucesso!");
+    }
+  });
+});
 
-  res.status(200).send("Carro deletado!");
+app.put("/cars/:id", (req, res) => {
+  const car = req.body;
+  const id = req.params.id;
+  const query = "UPDATE table_cars SET ? WHERE id=?";
+
+  conexao.query(query, [car, id], (err, result) => {
+    if (err) {
+      res.status(404).json({ error: "Carro não localizado!" });
+    } else {
+      res.status(200).json({ success: "Carro atualizado!" });
+    }
+  });
 });
 
 export default app;
