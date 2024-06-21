@@ -1,69 +1,43 @@
-import conexao from "../database/conexao.js";
+import CarRepository from "../repositories/CarRepository.js";
 
 class CarController {
-  getAllCar(req, res) {
-    const query = "SELECT * FROM table_cars;";
+  async getAllCar(req, res) {
+    const result = await CarRepository.findAll();
 
-    conexao.query(query, (err, result) => {
-      if (err) {
-        res.status(404).json({ erro: "Dados não localizados!" });
-      } else {
-        res.status(200).send(result);
-      }
-    });
+    res.status(200).send(result);
   }
 
-  getCarById(req, res) {
-    const query = "SELECT * FROM table_cars WHERE id =?";
+  async getCarById(req, res) {
     const id = req.params.id;
 
-    conexao.query(query, id, (err, result) => {
-      if (err) {
-        res.status(404).json({ error: "Dados não localizados!" });
-      } else {
-        res.status(200).send(result);
-      }
-    });
+    const result = await CarRepository.findById(id);
+
+    res.status(200).send(result);
   }
 
-  addCar(req, res) {
+  async addCar(req, res) {
     const car = req.body;
-    const query = "INSERT INTO table_cars SET ?";
 
-    conexao.query(query, car, (err, result) => {
-      if (err) {
-        res.status(400).json({ error: "Não foi possível adicionar" });
-      } else {
-        res.status(201).json({ sucess: "Carro adicionado!" });
-      }
-    });
+    const result = await CarRepository.store(car);
+
+    res.status(201).send(result);
   }
 
-  deleteCar(req, res) {
+  async deleteCar(req, res) {
     const id = req.params.id;
-    const query = "DELETE FROM table_cars WHERE id=?";
 
-    conexao.query(query, id, (err, result) => {
-      if (err) {
-        res.send(404).json({ error: "Carro não localizado!" });
-      } else {
-        res.status(200).send("Carro deletado com sucesso!");
-      }
-    });
+    const result = await CarRepository.delete(id);
+
+    res.status(200).send(result);
   }
 
-  updateCar(req, res) {
+  async updateCar(req, res) {
     const car = req.body;
     const id = req.params.id;
-    const query = "UPDATE table_cars SET ? WHERE id=?";
 
-    conexao.query(query, [car, id], (err, result) => {
-      if (err) {
-        res.status(404).json({ error: "Carro não localizado!" });
-      } else {
-        res.status(200).json({ success: "Carro atualizado!" });
-      }
-    });
+    const result = await CarRepository.update(car, id);
+
+    res.status(200).send(result);
   }
 }
 
